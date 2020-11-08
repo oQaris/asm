@@ -1,24 +1,11 @@
-﻿#include <stdio.h>
-#include <string.h>
+﻿#include "stdio.h"
+#include "string.h"
 
 int main() {
-    /*printf("input string:\n");
-    char str[256];
-    fgets(str, 256, stdin);
-    int n = strlen(str);
-    for (int i = n - 1; i >= 0; i--) {
-        if (str[i] == ' ') {
-            for (int j = i; j < n; j++) {
-                str[j] = str[j + 1];
-            }
-            n--;
-        }
-    }
-    printf("result:\n%s", str);*/
-
     char input[] = "input string:\n";
     char result[] = "result:\n%s";
     char str_arr[256];
+
     __asm {
         lea     eax, input
         push    eax
@@ -61,15 +48,13 @@ FOR_I:
         mov     edi, esi                ; j = i
 FOR_J:
         cmp     edi, edx                ; j < n
-        jge     NEXT_I
+        jge     NEXT_J
 
         ; str[j] = str[j + 1]
         mov     eax, [ebx][edi + 1]
         mov     [ebx][edi], eax
         inc     edi                     ; j++
         jmp     FOR_J
-NEXT_I:
-        sub     edx, 1
 NEXT_J:
         dec     esi                     ; i--
         jmp     FOR_I
