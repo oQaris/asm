@@ -9,52 +9,47 @@ int main() {
     __asm {
         lea     eax, input
         push    eax
-        call    dword ptr printf
+        call    printf
         add     esp, 4
 
         lea     ebx, str_arr
-        ; т.к. #define stdin(__acrt_iob_func(0))
-        push    0
-        call    __acrt_iob_func
-        add     esp, 4
-        push    eax
         push    256
         push    ebx
-        call    fgets               ; scanf не учитывает пробелы, поэтому - fgets
-        add     esp, 12
+        call    gets_s          ; scanf не учитывает пробелы, поэтому - gets_s
+        add     esp, 8
 
         lea     ecx, str_arr
         push    ecx
         call    strlen
         add     esp, 4
 
-        ; Распределим данные по регистрам:
+        ; Распределим данные по регистрам :
         ; esi i
         ; edi - j
         ; ebx - str_arr
-        ; eax - буферный элемент
+        ; al и eax - буферные элементы
         ; edx - n
 
         mov     edx, eax                ; n = strlen(str)
-        sub     edx, 1
         mov     esi, edx                ; i = n - 1
         lea     ebx, str_arr
 FOR_I:
         cmp     esi, 0                  ; i >= 0
         jl      FIN
-        movsx   eax, [ebx][esi]
-        cmp     eax, 32                 ; str[i] == ' '
+        mov     al, [ebx][esi]
+        cmp     al, ' '                 ; str[i] == ' '
         jne     NEXT_J
         mov     edi, esi                ; j = i
 FOR_J:
         cmp     edi, edx                ; j < n
-        jge     NEXT_J
+        jge     IF
 
-        ; str[j] = str[j + 1]
-        mov     eax, [ebx][edi + 1]
-        mov     [ebx][edi], eax
+        mov     al, [ebx][edi + 1]
+        mov     [ebx][edi], al
         inc     edi                     ; j++
         jmp     FOR_J
+IF:
+        dec     edx                     ; n--
 NEXT_J:
         dec     esi                     ; i--
         jmp     FOR_I
@@ -62,7 +57,22 @@ FIN:
         push    ebx
         lea     eax, result
         push    eax
-        call    dword ptr printf
+        call    printf
         add     esp, 8
     }
+
+    /* Эквивалентный код на си:
+    printf("input string:\n");
+    char str[256];
+    gets_s(str, 256);
+    int n = strlen(str);
+    for (int i = n - 1; i >= 0; i--) {
+        if (str[i] == ' ') {
+            for (int j = i; j < n; j++) {
+                str[j] = str[j + 1];
+            }
+            n--;
+        }
+    }
+    printf("result:\n%s", str);*/
 }
